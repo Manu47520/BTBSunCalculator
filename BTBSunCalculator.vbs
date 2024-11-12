@@ -1,15 +1,46 @@
 Option Explicit
 
+' Fonction pour vérifier si une chaîne est un nombre valide (y compris avec une virgule ou un point)
+Function IsNumericValue(value)
+    Dim numericCheck
+    numericCheck = Replace(value, ",", ".") ' Remplacer les virgules par des points
+    IsNumericValue = IsNumeric(numericCheck)
+End Function
+
 ' Définissez les coordonnées GPS et la date/heure en UTC
 Dim latitude, longitude, year, month, day, hour, minute, second, time, date
-latitude = InputBox("Please enter the latitude of the GPS position:", "BTB Sun Calculator")
-latitude = Replace(latitude, ".", ",")
-longitude = InputBox("Please enter the longitude of the GPS position:", "BTB Sun Calculator")
-longitude = Replace(longitude, ".", ",")
+
+' Boucle pour la saisie de la latitude avec vérification
+Do
+    latitude = InputBox("Please enter the latitude of the GPS position:", "BTB Sun Calculator")
+    
+    ' Si l'utilisateur clique sur "Annuler"
+    If latitude = "" Then WScript.Quit
+    
+    latitude = Replace(latitude, ".", ",") ' Utiliser la virgule pour la consistance
+    If IsNumericValue(latitude) Then Exit Do
+    MsgBox "Invalid latitude. Please enter a numeric value.", vbExclamation, "BTB Sun Calculator"
+Loop
+
+' Boucle pour la saisie de la longitude avec vérification
+Do
+    longitude = InputBox("Please enter the longitude of the GPS position:", "BTB Sun Calculator")
+    
+    ' Si l'utilisateur clique sur "Annuler"
+    If longitude = "" Then WScript.Quit
+    
+    longitude = Replace(longitude, ".", ",") ' Utiliser la virgule pour la consistance
+    If IsNumericValue(longitude) Then Exit Do
+    MsgBox "Invalid longitude. Please enter a numeric value.", vbExclamation, "BTB Sun Calculator"
+Loop
 
 ' Boucle pour la saisie de la date avec vérification
 Do
     date = InputBox("Please enter a date in DD/MM/YYYY format:", "BTB Sun Calculator")
+    
+    ' Si l'utilisateur clique sur "Annuler"
+    If date = "" Then WScript.Quit
+    
     Dim regexDate
     Set regexDate = New RegExp
     regexDate.Pattern = "^\d{2}/\d{2}/\d{4}$"
@@ -23,16 +54,20 @@ Do
         If IsDate(day & "/" & month & "/" & year) Then
             Exit Do
         Else
-            MsgBox "The date entered is invalid. Please try again.", 0+48+0, "BTB Sun Calculator"
+            MsgBox "The date entered is invalid. Please try again.", vbExclamation, "BTB Sun Calculator"
         End If
     Else
-        MsgBox "Incorrect date format. Please use DD/MM/YYYY.", 0+48+0, "BTB Sun Calculator"
+        MsgBox "Incorrect date format. Please use DD/MM/YYYY.", vbExclamation, "BTB Sun Calculator"
     End If
 Loop
 
 ' Boucle pour la saisie de l'heure avec vérification
 Do
     time = InputBox("Please enter the time in HH:MM format:", "BTB Sun Calculator")
+    
+    ' Si l'utilisateur clique sur "Annuler"
+    If time = "" Then WScript.Quit
+    
     Dim regexTime
     Set regexTime = New RegExp
     regexTime.Pattern = "^\d{2}:\d{2}$"
@@ -45,10 +80,10 @@ Do
         If hour >= 0 And hour < 24 And minute >= 0 And minute < 60 Then
             Exit Do
         Else
-            MsgBox "The time entered is invalid. Please try again.", 0+48+0, "BTB Sun Calculator"
+            MsgBox "The time entered is invalid. Please try again.", vbExclamation, "BTB Sun Calculator"
         End If
     Else
-        MsgBox "Incorrect time format. Please use HH:MM.", 0+48+0, "BTB Sun Calculator"
+        MsgBox "Incorrect time format. Please use HH:MM.", vbExclamation, "BTB Sun Calculator"
     End If
 Loop
 
@@ -79,10 +114,6 @@ Dim openFile
 openFile = MsgBox("Do you want to open the settings.ini file?", vbYesNo + vbQuestion, "BTB Sun Calculator")
 
 If openFile = vbYes Then
-    Set file = Nothing
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    fso.OpenTextFile("settings.ini").Close  ' Force la fermeture au cas où
-
     ' Ouvrir le fichier avec l'éditeur de texte par défaut
     Dim shell
     Set shell = CreateObject("WScript.Shell")
@@ -168,16 +199,24 @@ Function CalcAzimuth(lat, DEC, H)
     CalcAzimuth = Atan2(-Sin(DegToRad(H)), Tan(DegToRad(DEC)) * Cos(DegToRad(lat)) - Sin(DegToRad(lat)) * Cos(DegToRad(H)))
 End Function
 
-Function DegToRad(deg)
-    DegToRad = deg * (3.14159265358979 / 180)
+Function DegToRad(degrees)
+    DegToRad = degrees * (3.14159265358979 / 180)
 End Function
 
-Function RadToDeg(rad)
-    RadToDeg = rad * (180 / 3.14159265358979)
+Function RadToDeg(radians)
+    RadToDeg = radians * (180 / 3.14159265358979)
 End Function
 
 Function Asin(x)
-    Asin = RadToDeg(Atn(x / Sqr(-x * x + 1)))
+    If Abs(x) = 1 Then
+        If x = -1 Then
+            Asin = -90
+        Else
+            Asin = 90
+        End If
+    Else
+        Asin = RadToDeg(Atn(x / Sqr(-x * x + 1)))
+    End If
 End Function
 
 Function Atan2(y, x)
