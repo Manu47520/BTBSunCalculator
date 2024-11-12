@@ -107,6 +107,7 @@ Call CalculateAndWriteSunPosition(3, 0, "Night", True)
 ' Fermer le fichier settings.ini
 file.Close
 
+' Affiche le message de creation de fichier
 MsgBox "The settings.ini file was created with sun positions for specified time, Sunrise (06:00), Noon (13:00), Sunset (18:00), and Night (03:00).", vbInformation, "BTB Sun Calculator"
 
 ' Demander à l'utilisateur s'il souhaite ouvrir le fichier
@@ -172,7 +173,7 @@ Sub CalculateAndWriteSunPosition(calcHour, calcMinute, label, addCommentSymbol)
     file.WriteLine lineContent
 End Sub
 
-' Fonctions pour les calculs (inchangées)
+' Fonctions pour les calculs
 Function CalcJulianDate(y, m, d, UT)
     CalcJulianDate = 367 * y - Int((7 * (y + Int((m + 9) / 12))) / 4) + Int(275 * m / 9) + d + 1721013.5 + (UT / 24)
 End Function
